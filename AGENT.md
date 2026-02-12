@@ -1,34 +1,31 @@
-Inventory Model
-Open the Inventory.java file 
-Add the following attributes along with getters and setters:
-id: private long; represents the product id in the inventory
+Part 3: Create Repositories and Services
+You are going to create repositories and services in this layer. Repositories handle direct communication with the database, providing methods to fetch, save, update, and delete data, often using JPA. Services sit above repositories and contain the business logic, coordinating between repositories and controllers to process data and enforce rules before returning results.
 
-product: private Product; represents the product in the inventory
+You will also notice the use of Data Transfer Objects or DTOs. These are classes that are used to transfer data between different layers of the application, such as between the service and controller layers. In the repository layer, DTOs are often used in custom queries to fetch specific fields efficiently, improving performance and security. This approach reduces memory usage, keeps APIs clean, and separates internal entity design from external data structures.
 
-store: private Store; represents the store where the inventory is stored
+Customer Repository
+Open the CustomerRepository.java file
+ Open CustomerRepository.java in IDE
 
-stockLevel: private Integer; represents the current stock level of the product at the store
+Create a repository for the Customer model by extending JpaRepository. This will allow for basic CRUD operations without needing to implement the methods manually.
 
-Hint:
+Add the following methods:
 
-Use @Id and @GeneratedValue(strategy = GenerationType.IDENTITY) for id to auto increment it and set it as primary key
-Set up relationships:
-Product: An inventory entry is associated with one product. Use the @ManyToOne annotation and link it to the Product entity.
+findByEmail: Find a customer by their email address.
 
-Hint:
+Return type: Customer
 
-Use the @JsonBackReference("inventory-product") to handle the bidirectional relationship correctly and prevent circular references during JSON serialization.
-Store: An inventory entry is also associated with one store. Use the @ManyToOne annotation and link it to the Store entity.
+Parameter: String email
 
-Hint:
+findById: Find a customer by their ID.
 
-Use @JsonBackReference("inventory-store") to manage the relationship with the store.
-Use the @JoinColumn annotation to specify the foreign key column names:
-For the product field, use @JoinColumn(name = "product_id").
+Return type: Customer
 
-For the store field, use @JoinColumn(name = "store_id").
+Parameter: Long id
 
 Hint:
 
-Create a constructor that takes in a Product, Store, and Integer stockLevel to initialize the Inventory object.
-Add @Entity annotation above class name
+Extend JpaRepository<Customer, Long> to inherit basic CRUD functionality.
+Declare custom query methods like findByEmail and findById for additional queries.
+For Example:
+Customer findByEmail(String email);

@@ -1,29 +1,32 @@
-Product Model
-Open the Product.java file 
+Inventory Repository
+Open the InventoryRepository.java file
+ Open InventoryRepository.java in IDE
 
-Add the following attributes along with getters and setters:
-id: private long; auto increment
+Add the following methods:
+findByProductIdandStoreId: Find an inventory record by its product ID and store ID.
 
-name: private String; cannot be empty
+Return type: Inventory
 
-category: private String; cannot be empty
+Parameters: Long productId, Long storeId
 
-price: private Double; cannot be empty
+Query: "SELECT i FROM Inventory i WHERE i.product.id = :productId AND i.store.id = :storeId"
 
-sku: private String; cannot be empty, must be unique
+findByStore_Id: Find a list of inventory records for a specific store.
+
+Return type: List<Inventory>
+
+Parameter: Long storeId
+
+deleteByProductId: Delete all inventory records related to a specific product ID.
+
+Return type: void
+
+Parameter: Long productId
+
+Use @Modifying and @Transactional annotations to modify the database and ensure the transaction is managed correctly.
 
 Hint:
 
-Use @Id and @GeneratedValue(strategy = GenerationType.IDENTITY) for id to auto increment it and set it as primary key
-Use @NotNull for the name, category, price, and sku fields to ensure they are not null when creating a Product object.
-Use the @Table annotation with a uniqueConstraints attribute to enforce uniqueness on the sku column. Example: `@Table(name = “product”,
-uniqueConstraints = @UniqueConstraint(columnNames = “sku”)) - Add@Entity` annotation above class name
+Extend JpaRepository<Inventory, Long> for basic CRUD functionality.
 
-Set up relationships:
-Inventory: A product can have multiple inventory entries. Use the @OneToMany annotation to reflect this relationship.
-
-Hint:
-
-Use the mappedBy attribute to indicate the relationship with the Inventory class.
-
-Apply @JsonManagedReference("inventory-product") to handle the bidirectional relationship and prevent circular references during JSON serialization.
+Use @Query for custom queries, @Modifying for update/delete queries, and @Transactional to handle transactions.
