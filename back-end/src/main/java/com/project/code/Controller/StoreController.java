@@ -27,8 +27,14 @@ public class StoreController {
 
     @PostMapping
     public Map<String, String> addStore(@RequestBody Store store) {
-        Store saved = storeRepository.save(store);
         Map<String, String> response = new HashMap<>();
+        if (store == null || store.getName() == null || store.getName().trim().isEmpty()
+                || store.getAddress() == null || store.getAddress().trim().isEmpty()) {
+            response.put("Error", "Invalid store data");
+            return response;
+        }
+
+        Store saved = storeRepository.save(store);
         response.put("message", "Store added successfully with ID: " + saved.getId());
         return response;
     }
@@ -43,6 +49,10 @@ public class StoreController {
         Map<String, String> response = new HashMap<>();
 
         try {
+            if (!isValidOrderRequest(placeOrderRequest)) {
+                response.put("Error", "Invalid order data");
+                return response;
+            }
             orderService.saveOrder(placeOrderRequest);
             response.put("message", "Order placed successfully");
             return response;
@@ -50,5 +60,21 @@ public class StoreController {
             response.put("Error", ex.getMessage());
             return response;
         }
+    }
+
+    private boolean isValidOrderRequest(PlaceOrderRequestDTO request) {
+        return request != null
+                && request.getStoreId() != null
+                && request.getStoreId() > 0
+                && request.getCustomerName() != null
+                && !request.getCustomerName().trim().isEmpty()
+                && request.getCustomerEmail() != null
+                && !request.getCustomerEmail().trim().isEmpty()
+                && request.getCustomerPhone() != null
+                && !request.getCustomerPhone().trim().isEmpty()
+                && request.getPurchaseProduct() != null
+                && !request.getPurchaseProduct().isEmpty()
+                && request.getTotalPrice() != null
+                && request.getTotalPrice() >= 0;
     }
 }

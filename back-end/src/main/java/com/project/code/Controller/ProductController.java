@@ -38,6 +38,11 @@ public class ProductController {
         Map<String, String> response = new HashMap<>();
 
         try {
+            if (!isValidProductInput(product, false)) {
+                response.put("message", "Invalid product data");
+                return response;
+            }
+
             if (!serviceClass.validateProduct(product)) {
                 response.put("message", "Product already exists");
                 return response;
@@ -67,6 +72,15 @@ public class ProductController {
         Map<String, String> response = new HashMap<>();
 
         try {
+            if (!isValidProductInput(product, true)) {
+                response.put("message", "Invalid product data");
+                return response;
+            }
+            if (!serviceClass.ValidateProductId(product.getId())) {
+                response.put("message", "Product not present in database");
+                return response;
+            }
+
             productRepository.save(product);
             response.put("message", "Product updated successfully");
             return response;
@@ -111,15 +125,20 @@ public class ProductController {
     public Map<String, String> deleteProduct(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
 
-        if (!serviceClass.ValidateProductId(id)) {
-            response.put("message", "Product not present in database");
+        try {
+            if (!serviceClass.ValidateProductId(id)) {
+                response.put("message", "Product not present in database");
+                return response;
+            }
+
+            inventoryRepository.deleteByProductId(id);
+            productRepository.deleteById(id);
+            response.put("message", "Product deleted successfully");
+            return response;
+        } catch (Exception ex) {
+            response.put("Error", ex.getMessage());
             return response;
         }
-
-        inventoryRepository.deleteByProductId(id);
-        productRepository.deleteById(id);
-        response.put("message", "Product deleted successfully");
-        return response;
     }
 
     @GetMapping("/searchProduct/{name}")
@@ -127,5 +146,18 @@ public class ProductController {
         Map<String, Object> response = new HashMap<>();
         response.put("products", productRepository.findProductBySubName(name));
         return response;
+    }
+
+    private boolean isValidProductInput(Product product, boolean requireId) {
+        if (product == null) {
+            return false;
+        }
+        if (requireId && product.getId() <= 0) {
+            return false;
+        }
+        return product.getName() != null && !product.getName().trim().isEmpty()
+                && product.getCategory() != null && !product.getCategory().trim().isEmpty()
+                && product.getSku() != null && !product.getSku().trim().isEmpty()
+                && product.getPrice() != null && product.getPrice() >= 0;
     }
 }

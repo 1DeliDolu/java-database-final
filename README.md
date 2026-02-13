@@ -1,353 +1,451 @@
-Part 4: Create Controllers
-Controllers handle incoming HTTP requests, map them to appropriate service methods, and return responses to the client. They act as the entry point of the application, managing the flow between the frontend and backend while keeping the business logic separate.
-
-Inventory Controller
-Purpose: This controller handles the CRUD operations for managing inventory. It provides endpoints for updating, saving, searching, and validating inventory and products.
-
-Open the InventoryController.java file
- Open InventoryController.java in IDE
-
-Set Up the Controller Class
-Annotate the class with @RestController to designate it as a REST controller for handling HTTP requests.
-
-Use @RequestMapping("/inventory") to set the base URL path for all methods in this controller.
-
-Autowired Dependencies
-Autowire the necessary services and repositories:
-
-ProductRepository for accessing the product data.
-
-InventoryRepository for accessing inventory data.
-
-ServiceClass for validating product IDs and inventory.
-
-Define the updateInventory Method
-Annotate this method with @PutMapping.
-
-The method should accept a request body of type CombinedRequest, which contains both a Product and Inventory.
-
-It should return a Map<String, String>.
-
-Validate the product ID.
-Hint: Use method created in ServiceClass to validate productId. If the product doesn't exist, return an error message.
-
-Update the Product and Inventory if the product ID is valid:
-
-If the Inventory exists for the product, update it and save the changes also return a key message with value “Successfully updated product”
-
-If the Inventory doesn't exist for the product, return a key message with value “No data available”.
-
-Catch any exceptions (e.g., DataIntegrityViolationException) and handle them appropriately.
-
-Define the saveInventory Method
-Annotate this method with @PostMapping.
-
-The method should accept an Inventory object in the request body.
-
-The method should return Map<String, String>
-
-Check if the inventory already exists.
-Hint: Use the method validateInventory(inventory) created in ServiceClass to validate inventory.
-
-If it exists, return a message saying that the data is already present.
-
-If it doesn't exist, save the Inventory object to the repository and return message saying data saved successfully
-
-Catch any exceptions related to data integrity or other errors and handle them appropriately.
-
-Define the getAllProducts Method
-Annotate this method with @GetMapping("/{storeid}") to retrieve products for a specific store.
-
-The method should accept a storeId as a path variable and fetch the products for that store.
-Hint: Call the findProductsByStoreId(storeid) method on the ProductRepository to get the products belonging to the store with the given storeid.
-
-The method should return Map<String, Object>
-
-Return the list of products as part of a map with the key "products".
-
-Define the getProductName Method
-Annotate this method with @GetMapping("filter/{category}/{name}/{storeid}").
-
-This method should filter products by category and name.
-
-The method should return Map<String, Object>
-
-If either category or name is "null", adjust the filtering logic accordingly:
-
-If category is "null", filter by product name only.
-Hint: Call the findByNameLike(storeid, name) method on the ProductRepository to get the filtered products by name.
-
-If name is "null", filter by category only.
-Hint: Call the findByCategoryAndStoreId method on the ProductRepository to get the filtered products by category.
-
-If both category and name are provided, filter products by both parameters.
-Hint: Call the findByNameAndCategory method on the ProductRepository to get the filtered products by name and category.
-
-Return the filtered products as part of the response map with the key "product".
-
-Define the searchProduct Method
-Annotate this method with @GetMapping("search/{name}/{storeId}").
-
-The method should return Map<String, Object>
-
-The method should search for products by name within a specific store.
-
-Hint: Use method findByNameLike(storeId, name) on the ProductRepository to search for products with names that match the name parameter.
-
-Return the products found in the response map with the key "product".
-
-Define the removeProduct Method
-Annotate this method with @DeleteMapping("/{id}").
-
-The method should return Map<String, String>
-
-This method should delete a product by its id.
-
-Hint: Use method ValidateProductId(id) on the ServiceClass to check if the product exists. If it doesn't exist, return a message saying the product not present in database.
-
-If the product exists, delete the corresponding Inventory entry
-
-Hint: Use method deleteByProductId(id) on the InventoryRepository.
-
-Return a success message with key messageindicating that the product was deleted.
-
-Define the validateQuantity Method
-Annotate this method with @GetMapping("validate/{quantity}/{storeId}/{productId}").
-
-The method should return boolean .
-
-This method should validate if a specified quantity of a product is available in stock at a given store.
-
-Retrieve the inventory for the product and store.
-
-Hint: Use method findByProductIdandStoreId(productId, storeId) on the InventoryRepository.
-
-If the stock level is greater than or equal to the requested quantity, return true. Otherwise, return false.
-
-Product Controller
-Purpose: This controller manages the CRUD operations related to the Product entity in your application. Here's how to implement it step by step.
-
-Open the ProductController.java file
- Open ProductController.java in IDE
-
-Set Up the Controller Class
-Annotate the class with @RestController to denote it as a controller that handles REST API calls.
-
-Map the class to the /product URL by using @RequestMapping("/product").
-
-Autowired Dependencies
-You need the following dependencies injected via @Autowired:
-
-ProductRepository: For interacting with the product data in the database.
-
-ServiceClass: For validating product data and checking business logic like product existence.
-
-InventoryRepository: To manage the inventory associated with the products.
-
-Define the addProduct Method
-@PostMapping: This method will handle POST requests to add a new product.
-
-This method will return Map<String, String>
-
-Request Body: Accept a Product object from the request body.
-
-Validation: Check if the product already exists.
-
-Hint: Use method validateProduct() on the ServiceClass.
-
-Save Product: If the product is valid, save it to the database.
-
-Hint: Use save() method of ProductRepository to save.
-
-After saving the product return a success message with key message.
-
-Handle Errors: Catch exceptions such as DataIntegrityViolationException for scenarios like unique SKU violations.
-
-Define the getProductbyId Method
-@GetMapping("/product/{id}"): This method will handle GET requests to retrieve a product by its id.
-
-This method will return Map<String, Object>
-
-Path Variable: Use @PathVariable to accept the product id in the URL.
-
-Return Product: Fetch the product and return it in a map with key products.
-
-Hint: Use method findById(id) of ProductRepository to fetch product.
-
-Define the updateProduct Method
-@PutMapping: This method will handle PUT requests to update an existing product.
-
-This method will return Map<String, String>
-
-Request Body: Accept a Product object to update.
-
-Save Product: Save the updated product.
-
-Hint: Use save() method of ProductRepository to save the updated Product.
-
-After updating the product return a success message with key message.
-
-Error Handling: Catch any errors during the save operation.
-
-Define the filterbyCategoryProduct Method
-@GetMapping("/category/{name}/{category}"): This method filters products based on their name and category.
-
-This method will return Map<String, Object>
-
-Handle Null Parameters: If name or category is "null", apply conditional filtering logic accordingly.
-
-Return Filtered Products: Fetch products using repository methods like findByCategory(), findByCategory(category) or findProductBySubNameAndCategory() based on the provided filters and return in with key products
-
-Define the listProduct Method
-@GetMapping: This method will handle GET requests to retrieve all products.
-
-This method will return Map<String, Object>
-
-Return All Products: Fetch and return all products with key products
-
-Hint: Use findAll() method of ProductRepository to fetch all the product.
-
-Define the getProductbyCategoryAndStoreId Method
-@GetMapping("filter/{category}/{storeid}"): This method will filter products by category and storeId.
-
-This method will return Map<String, Object>
-
-Fetch Products: Retrieve all the products by category & storeId and return with key product
-
-Hint: Use method findProductByCategory() of ProductRepository. to retrieve all the products by category and storeId
-
-Define the deleteProduct Method
-@DeleteMapping("/{id}"): This method will handle DELETE requests to remove a product by its id.
-
-This method will return Map<String, String>
-
-Validation: Check if the product exists before deleting.
-
-Hint: Use ValidateProductId() method of ServiceClass to validate product.
-
-Delete Product: As Inventory is mapped with Product using foreign key constraint, delete from Inventory table first and then from Product table.
-
-Hint: Use method deleteByProductId(id) of inventoryRepository to remove the inventory entry and use method deleteById(id) of productRepository to delete the product.
-
-Return a success message with key messageindicating that the product was deleted.
-
-Define the searchProduct Method
-@GetMapping("/searchProduct/{name}"): This method will search for products by their name.
-
-This method will return Map<String, Object>
-
-Return Search Results: Search for products by name an return with key products
-
-Hint: Use method findProductBySubName() of ProductRepositoryto search products.
-
-Review Controller
-Purpose: The ReviewController handles endpoints for retrieving reviews for products in a store. It provides methods for getting all reviews or filtered reviews by store ID and product ID, with customer information associated with each review.
-
-Open the ReviewController.java file
- Open ReviewController.java in IDE
-
-Set Up the Controller Class
-Action: Annotate the class with @RestController to designate it as a REST controller for handling HTTP requests.
-
-URL Mapping: Use @RequestMapping("/reviews") to define the base URL for all methods in this controller.
-
-Autowired Dependencies
-Action: Autowire the necessary repositories:
-
-ReviewRepository for accessing the review data.
-
-CustomerRepository for retrieving customer details linked with reviews.
-
-Define the getReviews Method
-URL Mapping: Use @GetMapping("/{storeId}/{productId}") to create an endpoint that retrieves reviews for a specific product in a store by storeId and productId.
-
-Method will return a Map<String, Object>
-
-Path Variables:
-
-storeId: The ID of the store.
-
-productId: The ID of the product.
-
-Logic :
-
-First retreive all the reviews from the database of a specific product of a store.
-Hint: Use method findByStoreIdAndProductId of ReviewRepository to fetch all the reviews of a specific product of a store.
-Now from all the recevied reviews filter remove the unwanted data and keep comment, rating. Now add name of the customer to the table using customer id field in the reviews.
-Hint: Use method findByid(review.getCustomerId()) of CustomerRepository
-Return Key: The response will include a key named reviews. The value for this key will be a list of review objects, each containing the review comment, rating, and the name of the customer who wrote the review.
-
-Customer Name Key: Each review object will include a key named customerName, which will either contain the customer's name or "Unknown" if no customer is found.
-Store Controller
-Purpose: The StoreController handles the operations related to stores, including adding a new store, validating an existing store, and placing an order. It integrates with the StoreRepository and the OrderService for managing store and order operations.
-
-Open the StoreController.java file
- Open StoreController.java in IDE
-
-Set Up the Controller Class
-Action: Annotate the class with @RestController to designate it as a REST controller for handling HTTP requests.
-
-URL Mapping: Use @RequestMapping("/store") to set the base URL path for all methods in this controller.
-
-Autowired Dependencies
-Action: Autowire the necessary repositories and services:
-
-StoreRepository for accessing store data.
-
-OrderService for handling order-related functionality.
-
-Define the addStore Method
-URL Mapping: Use @PostMapping to create an endpoint for adding a new store.
-
-Request Body: This method should accept a Store object in the request body.
-
-Return Key: The response will include a key named message. The value for this key will indicate that the store was successfully created and will include the store's ID.
-
-Define the validateStore Method
-URL Mapping: Use @GetMapping("validate/{storeId}") to create an endpoint that checks if a store with a given storeId exists.
-
-Path Variable: storeId represents the ID of the store to be validated.
-
-Return Key: This method will return a boolean value indicating whether the store exists. If the store is found, the method will return true; otherwise, it will return false.
-
-Define the placeOrder Method
-URL Mapping: Use @PostMapping("/placeOrder") to create an endpoint for placing an order.
-
-Request Body: This method should accept a PlaceOrderRequestDTO object in the request body.
-
-Return Key: The response will include a key named message with the value "Order placed successfully" if the order is successfully processed.
-
-Error Key: If an error occurs while placing the order, the response will include a key named Error with the value being the error message.
-Response Structure for Methods
-addStore: Returns a Map<String, String> with a key named message indicating the store ID.
-
-validateStore: Returns a boolean value to indicate if the store exists (true or false).
-
-placeOrder: Returns a Map<String, String> with either:
-
-message: "Order placed successfully" if the order is placed without issues.
-
-Error: The error message if there is a failure in processing the order.
-
-Global Exception Handler
-Purpose: The GlobalExceptionHandler is responsible for handling exceptions globally across all controllers. It ensures that the application responds with meaningful error messages when an exception occurs, improving the user experience and maintaining consistent error handling.
-
-Open the GlobalExceptionHandler.java file
- Open GlobalExceptionHandler.java in IDE
-
-Set Up the Global Exception Handler Class
-Action: Annotate the class with @RestControllerAdvice. This annotation makes the class capable of handling exceptions globally for all REST controllers in your application.
-Define the handleJsonParseException Method
-Exception Type: Use the @ExceptionHandler(HttpMessageNotReadableException.class) annotation to handle HttpMessageNotReadableException. This exception typically occurs when the request body is not formatted correctly (e.g., invalid JSON syntax).
-
-HTTP Status: Use @ResponseStatus(HttpStatus.BAD_REQUEST) to specify that the response will have an HTTP status of 400 Bad Request when this exception is thrown.
-
-Return Key: The method will return a Map<String, Object> containing the following key:
-
-message: A descriptive error message indicating that the input provided is invalid. The value of the message key should be: "Invalid input: The data provided is not valid."
-Exception Handling Flow
-If a request fails to parse correctly (e.g., due to invalid JSON), the application will invoke the handleJsonParseException method.
-
-This will return a response with a 400 Bad Request status and the error message under the key message.
-
-
+#InventoryController.java 
+package com.project.code.Controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.code.Model.CombinedRequest;
+import com.project.code.Model.Inventory;
+import com.project.code.Model.Product;
+import com.project.code.Repo.InventoryRepository;
+import com.project.code.Repo.ProductRepository;
+import com.project.code.Service.ServiceClass;
+
+@RestController
+@RequestMapping("/inventory")
+public class InventoryController {
+
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private ServiceClass serviceClass;
+
+    @PutMapping
+    public Map<String, String> updateInventory(@RequestBody CombinedRequest request) {
+        Product product = request.getProduct();
+        Inventory inventory = request.getInventory();
+
+        Map<String, String> map = new HashMap<>();
+        System.out.println("Stock Level: " + inventory.getStockLevel());
+        if (!serviceClass.ValidateProductId(product.getId())) {
+            map.put("message", "Id " + product.getId() + " not present in database");
+            return map;
+        }
+        productRepository.save(product);
+        map.put("message", "Successfully updated product with id: " + product.getId());
+
+        if (inventory != null) {
+            try {
+                Inventory result = serviceClass.getInventoryId(inventory);
+                if (result != null) {
+                    inventory.setId(result.getId());
+                    inventoryRepository.save(inventory);
+                } else {
+                    map.put("message", "No data available for this product or store id");
+                    return map;
+                }
+
+            } catch (DataIntegrityViolationException e) {
+                map.put("message", "Error: " + e);
+                System.out.println(e);
+                return map;
+            } catch (Exception e) {
+                map.put("message", "Error: " + e);
+                System.out.println(e);
+                return map;
+            }
+        }
+
+        return map;
+
+    }
+
+    @PostMapping
+    public Map<String, String> saveInventory(@RequestBody Inventory inventory) {
+
+        Map<String, String> map = new HashMap<>();
+        try {
+            if (serviceClass.validateInventory(inventory)) {
+                inventoryRepository.save(inventory);
+            } else {
+                map.put("message", "Data Already present in inventory");
+                return map;
+            }
+
+        } catch (DataIntegrityViolationException e) {
+            map.put("message", "Error: " + e);
+            System.out.println(e);
+            return map;
+        } catch (Exception e) {
+            map.put("message", "Error: " + e);
+            System.out.println(e);
+            return map;
+        }
+        map.put("message", "Product added to inventory successfully");
+        return map;
+    }
+
+    @GetMapping("/{storeid}")
+    public Map<String, Object> getAllProducts(@PathVariable Long storeid) {
+        Map<String, Object> map = new HashMap<>();
+        List<Product> result = productRepository.findProductsByStoreId(storeid);
+        map.put("products", result);
+        return map;
+    }
+
+    @GetMapping("filter/{category}/{name}/{storeid}")
+    public Map<String, Object> getProductName(@PathVariable String category, @PathVariable String name,
+            @PathVariable long storeid) {
+        Map<String, Object> map = new HashMap<>();
+        if (category.equals("null") ) {
+            map.put("product", productRepository.findByNameLike(storeid, name));
+            return map;
+        }
+        else if(name.equals("null"))
+        {
+            System.out.println("name is null");
+            map.put("product", productRepository.findByCategoryAndStoreId(storeid,category));
+            return map;
+        }
+        map.put("product", productRepository.findByNameAndCategory(storeid, name, category));
+        return map;
+    }
+
+    @GetMapping("search/{name}/{storeId}")
+    public Map<String,Object> searchProduct(@PathVariable String name, @PathVariable long storeId)
+    {
+        Map<String, Object> map = new HashMap<>();
+        map.put("product", productRepository.findByNameLike(storeId, name));
+        return map;
+    }
+
+    @DeleteMapping("/{id}")
+    public Map<String, String> removeProduct(@PathVariable Long id) {
+        Map<String, String> map = new HashMap<>();
+
+        if (!serviceClass.ValidateProductId(id)) {
+            map.put("message", "Id " + id + " not present in database");
+            return map;
+        }
+        inventoryRepository.deleteByProductId(id);
+        map.put("message", "Deleted product successfully with id: " + id);
+        return map;
+    }
+
+    @GetMapping("validate/{quantity}/{storeId}/{productId}")
+    public boolean validateQuantity(@PathVariable int quantity, @PathVariable long storeId,
+            @PathVariable long productId) {
+        Inventory result = inventoryRepository.findByProductIdandStoreId(productId, storeId);
+        if (result.getStockLevel() >= quantity) {
+            return true;
+        }
+        return false;
+
+    }
+
+}
+
+ProductController.java 
+package com.project.code.Controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.code.Model.Product;
+import com.project.code.Repo.InventoryRepository;
+import com.project.code.Repo.OrderItemRepository;
+import com.project.code.Repo.ProductRepository;
+import com.project.code.Service.ServiceClass;
+
+@RequestMapping("/product")
+@RestController
+public class ProductController {
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ServiceClass serviceClass;
+
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
+    @PostMapping
+    public Map<String, String> addProduct(@RequestBody Product product) {
+
+        Map<String, String> map = new HashMap<>();
+        if (!serviceClass.validateProduct(product)) {
+            map.put("message", "Product already present in database");
+            return map;
+        }
+        try {
+            productRepository.save(product);
+            map.put("message", "Product added successfully");
+        }
+
+        catch (DataIntegrityViolationException e) {
+            map.put("message", "SKU should be unique");
+        }
+        return map;
+    }
+
+    @GetMapping("/product/{id}")
+    public Map<String, Object> getProductbyId(@PathVariable Long id) {
+        System.out.println("result: ");
+        System.out.println("result: ");
+        System.out.println("result: ");
+        Map<String, Object> map = new HashMap<>();
+        Product result = productRepository.findByid(id);
+
+        System.out.println("result: "+result);
+        map.put("products", result);
+        return map;
+    }
+
+    @PutMapping
+    public Map<String, String> updateProduct(@RequestBody Product product) {
+        Map<String, String> map = new HashMap<>();
+        try {
+            productRepository.save(product);
+            map.put("message", "Data upated sucessfully");
+        } catch (Error e) {
+            map.put("message", "Error occured");
+        }
+
+        return map;
+    }
+
+    @GetMapping("/category/{name}/{category}")
+    public Map<String, Object> filterbyCategoryProduct(@PathVariable String name,@PathVariable String category) {
+        Map<String, Object> map = new HashMap<>();
+
+        if(name.equals("null"))
+        {
+            map.put("products", productRepository.findByCategory(category));
+            return map;
+        }
+        else if(category.equals("null"))
+        {
+            map.put("products", productRepository.findProductBySubName(name));
+            return map;
+
+        }
+        map.put("products",productRepository.findProductBySubNameAndCategory(name,category));
+        return map;
+
+    }
+
+    @GetMapping
+    public Map<String, Object> listProduct() {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("products",productRepository.findAll());
+        return map;
+    }  
+
+
+
+
+    @GetMapping("filter/{category}/{storeid}")
+    public Map<String, Object> getProductbyCategoryAndStoreId(@PathVariable String category,@PathVariable long storeid) {
+       Map<String, Object> map = new HashMap<>();
+       List<Product> result = productRepository.findProductByCategory(category,storeid);
+
+        map.put("product", result);
+        return map;
+    }
+
+    @DeleteMapping("/{id}")
+    public Map<String, String> deleteProduct(@PathVariable Long id) {
+        Map<String, String> map = new HashMap<>();
+
+        if (!serviceClass.ValidateProductId(id)) {
+            map.put("message", "Id " + id + " not present in database");
+            return map;
+        }
+        inventoryRepository.deleteByProductId(id);
+        orderItemRepository.deleteByProductId(id);
+        productRepository.deleteById(id);
+
+        map.put("message", "Deleted product successfully with id: " + id);
+        return map;
+    }
+
+    @GetMapping("/searchProduct/{name}")
+    public Map<String, Object> searchProduct(@PathVariable String name) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("products", productRepository.findProductBySubName(name));
+        return map;
+    }
+
+
+}
+
+#ReviewController.java 
+package com.project.code.Controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.code.Model.Customer;
+import com.project.code.Model.Review;
+import com.project.code.Repo.CustomerRepository;
+import com.project.code.Repo.ReviewRepository;
+
+@RestController
+@RequestMapping("/reviews")
+public class ReviewController {
+
+    @Autowired
+    ReviewRepository reviewRepository;
+
+    @Autowired
+    CustomerRepository customerRepository;
+
+    @GetMapping("/{storeId}/{productId}")
+    public Map<String,Object> getReviews(@PathVariable long storeId, @PathVariable long productId)
+    {
+        Map<String, Object> map = new HashMap<>();
+         List<Review> reviews = reviewRepository.findByStoreIdAndProductId(storeId,productId);
+
+         List<Map<String, Object>> reviewsWithCustomerNames = new ArrayList<>();
+
+         // For each review, fetch customer details and add them to the response
+         for (Review review : reviews) {
+             Map<String, Object> reviewMap = new HashMap<>();
+             reviewMap.put("review", review.getComment());
+             reviewMap.put("rating", review.getRating());
+
+             // Fetch customer details using customerId
+             Customer customer = customerRepository.findByid(review.getCustomerId());
+             if (customer != null) {
+                 reviewMap.put("customerName", customer.getName());  
+             } else {
+                 reviewMap.put("customerName", "Unknown");
+             }
+
+             reviewsWithCustomerNames.add(reviewMap);
+         }
+
+         map.put("reviews", reviewsWithCustomerNames);
+         return map;
+
+    }
+
+    @GetMapping
+    public Map<String,Object> getAllReviews()
+    {
+        Map<String,Object> map=new HashMap<>();
+        map.put("reviews",reviewRepository.findAll());
+        return map;
+    }
+
+
+}
+
+# StoreController.java
+package com.project.code.Controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.code.Model.PlaceOrderRequestDTO;
+import com.project.code.Model.Store;
+import com.project.code.Repo.StoreRepository;
+import com.project.code.Service.OrderService;
+
+
+@RestController
+@RequestMapping("/store")
+public class StoreController {
+
+    @Autowired
+    private StoreRepository storeRepository;
+
+    @Autowired
+    private OrderService orderService;
+
+    @PostMapping
+    public Map<String, String> addStore(@RequestBody Store store) {
+        Store savedStore = storeRepository.save(store);
+        Map<String, String> map = new HashMap<>();
+        map.put("message", "Store added successfully with id "+ savedStore.getId());
+        return map;
+    }
+
+
+    @GetMapping("validate/{storeId}")
+    public boolean validateStore(@PathVariable Long storeId ) 
+    {
+        Store store=storeRepository.findByid(storeId);
+        if(store!=null)
+        {
+            return true;
+        }
+        return false;
+    }
+
+
+    @PostMapping("/placeOrder")
+    public Map<String,String> placeOrder(@RequestBody PlaceOrderRequestDTO placeOrderRequest) {
+
+        Map<String,String> map=new HashMap<>();
+        try{
+        orderService.saveOrder(placeOrderRequest);
+        map.put("message","Order placed successfully");
+        }
+        catch(Error e)
+        {
+            map.put("Error",""+e);
+
+        }
+        return map;  
+    }
+
+}

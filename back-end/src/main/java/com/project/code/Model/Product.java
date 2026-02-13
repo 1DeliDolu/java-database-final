@@ -1,6 +1,7 @@
 package com.project.code.Model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -92,5 +93,15 @@ public class Product {
 
     public void setInventories(List<Inventory> inventories) {
         this.inventories = inventories;
+    }
+
+    @JsonProperty("inventory")
+    public List<Inventory> getInventory() {
+        return inventories;
+    }
+
+    @JsonProperty("inventory")
+    public void setInventory(List<Inventory> inventory) {
+        this.inventories = inventory;
     }
 }

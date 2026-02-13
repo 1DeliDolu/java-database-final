@@ -7,9 +7,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,18 +18,19 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Valid
     @NotNull(message = "Name cannot be null")
     private String name;
 
     @NotNull(message = "Email cannot be null")
     private String email;
 
-    @NotNull(message = "Phone cannot be null")
+    @NotNull(message = "Phone No cannot be null")
     private String phone;
 
-    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "customer",fetch = FetchType.EAGER)
     @JsonManagedReference
-    private List<OrderDetails> orders = new ArrayList<>();
+    private List<OrderDetails> orders;
 
     public Customer() {
     }

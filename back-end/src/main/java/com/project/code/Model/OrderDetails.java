@@ -1,6 +1,11 @@
 package com.project.code.Model;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -10,10 +15,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 public class OrderDetails {
     @Id
@@ -22,6 +23,7 @@ public class OrderDetails {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonBackReference
     private Customer customer;
 
     @ManyToOne
@@ -32,12 +34,11 @@ public class OrderDetails {
 
     private LocalDateTime date;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
     @JsonManagedReference("order-item-order")
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderItem> orderItems;
 
-    public OrderDetails() {
-    }
+    public OrderDetails() {}
 
     public OrderDetails(Customer customer, Store store, Double totalPrice, LocalDateTime date) {
         this.customer = customer;

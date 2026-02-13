@@ -40,11 +40,27 @@ public class InventoryController {
         Map<String, String> response = new HashMap<>();
 
         try {
+            if (combinedRequest == null) {
+                response.put("message", "Invalid request data");
+                return response;
+            }
+
             Product product = combinedRequest.getProduct();
             Inventory inventory = combinedRequest.getInventory();
 
-            if (product == null || inventory == null || product.getId() == 0) {
+            if (product == null || inventory == null || product.getId() <= 0) {
                 response.put("message", "Invalid request data");
+                return response;
+            }
+            if (inventory.getProduct() == null || inventory.getStore() == null
+                    || inventory.getProduct().getId() <= 0
+                    || inventory.getStore().getId() == null || inventory.getStore().getId() <= 0
+                    || inventory.getStockLevel() == null || inventory.getStockLevel() < 0) {
+                response.put("message", "Invalid inventory data");
+                return response;
+            }
+            if (inventory.getProduct().getId() != product.getId()) {
+                response.put("message", "Product id mismatch");
                 return response;
             }
 
@@ -81,6 +97,14 @@ public class InventoryController {
         Map<String, String> response = new HashMap<>();
 
         try {
+            if (inventory == null || inventory.getProduct() == null || inventory.getStore() == null
+                    || inventory.getProduct().getId() <= 0
+                    || inventory.getStore().getId() == null || inventory.getStore().getId() <= 0
+                    || inventory.getStockLevel() == null || inventory.getStockLevel() < 0) {
+                response.put("message", "Invalid inventory data");
+                return response;
+            }
+
             if (!serviceClass.validateInventory(inventory)) {
                 response.put("message", "Data already present");
                 return response;
@@ -135,21 +159,29 @@ public class InventoryController {
     public Map<String, String> removeProduct(@PathVariable Long id) {
         Map<String, String> response = new HashMap<>();
 
-        if (!serviceClass.ValidateProductId(id)) {
-            response.put("message", "Product not present in database");
+        try {
+            if (!serviceClass.ValidateProductId(id)) {
+                response.put("message", "Product not present in database");
+                return response;
+            }
+
+            inventoryRepository.deleteByProductId(id);
+            productRepository.deleteById(id);
+            response.put("message", "Product deleted successfully");
+            return response;
+        } catch (Exception ex) {
+            response.put("Error", ex.getMessage());
             return response;
         }
-
-        inventoryRepository.deleteByProductId(id);
-        productRepository.deleteById(id);
-        response.put("message", "Product deleted successfully");
-        return response;
     }
 
     @GetMapping("/validate/{quantity}/{storeId}/{productId}")
     public boolean validateQuantity(@PathVariable Integer quantity,
                                     @PathVariable Long storeId,
                                     @PathVariable Long productId) {
+        if (quantity == null || quantity <= 0 || storeId == null || storeId <= 0 || productId == null || productId <= 0) {
+            return false;
+        }
         Inventory inventory = inventoryRepository.findByProductIdandStoreId(productId, storeId);
         return inventory != null && inventory.getStockLevel() != null && inventory.getStockLevel() >= quantity;
     }

@@ -1,6 +1,6 @@
 package com.project.code.Model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,12 +16,11 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    @JsonManagedReference("order-item-order")
+    @JsonBackReference("order-item-order")
     private OrderDetails order;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    @JsonManagedReference("order-item-product")
     private Product product;
 
     private Integer quantity;

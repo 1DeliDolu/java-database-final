@@ -326,6 +326,8 @@ async function createData(products, storeId) {
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = '';
     products.forEach(product => {
+        const inventoryList = product.inventory || product.inventories || [];
+        const stockLevelValue = inventoryList.length > 0 ? inventoryList[0].stockLevel : 0;
 
         const row = document.createElement('tr');
 
@@ -351,7 +353,7 @@ async function createData(products, storeId) {
 
         const stockLevel = document.createElement('td');
         stockLevel.classList.add('expandable');
-        stockLevel.textContent = product.inventory[0].stockLevel;
+        stockLevel.textContent = stockLevelValue;
 
         const reviewCol = document.createElement('td');
         const reviewBtn = document.createElement('button');
@@ -369,7 +371,7 @@ async function createData(products, storeId) {
         button.classList.add('btn', 'btn-warning');
         button.textContent = 'Edit';
         button.addEventListener('click', () => {
-            window.location = `edit-product.html?productId=${product.id}&storeId=${storeId}&stockLevel=${product.inventory[0].stockLevel}`;
+            window.location = `edit-product.html?productId=${product.id}&storeId=${storeId}&stockLevel=${stockLevelValue}`;
 
         });
         buttoncolumn.appendChild(button);
